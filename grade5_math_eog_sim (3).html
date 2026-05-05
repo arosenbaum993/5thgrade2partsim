@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grade 5 Math EOG Simulation - Georgia Milestones</title>
+<style>
+  /* ============================================================
+     RESET & BASE
+     ============================================================ */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { font-size: 17px; }
+  body {
+    margin: 0;
+    font-family: Georgia, 'Times New Roman', 'Iowan Old Style', serif;
+    color: #0E2536;
+    background: #FBF8F2;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  input { font-family: inherit; }
+  h1, h2, h3 { font-family: Georgia, 'Times New Roman', serif; font-weight: 600; letter-spacing: -0.01em; }
+
+  /* ============================================================
+     COLOR TOKENS
+     ============================================================ */
+  :root {
+    --bg: #FBF8F2;
+    --ink: #0E2536;
+    --muted: #5C6B78;
+    --line: #D8CFC0;
+    --card: #FFFFFF;
+    --accent: #B84A3D;       /* Brick red - primary action */
+    --accent-dark: #8E3429;
+    --gold: #C99A2C;         /* Timer warning */
+    --green: #3F7E4F;        /* Correct */
+    --red: #B84A3D;          /* Incorrect */
+    --flag: #D4A933;         /* Vocab flag */
+    --shadow: 0 1px 3px rgba(14,37,54,0.08), 0 4px 14px rgba(14,37,54,0.06);
+  }
+
+  /* ============================================================
+     SCREENS
+     ============================================================ */
+  .screen { min-height: 100vh; padding: 24px; }
+  .screen[hidden] { display: none !important; }
+
+  /* ============================================================
+     ENTRY SCREEN
+     ============================================================ */
+  #entry-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .entry-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 48px 56px;
+    max-width: 560px;
+    width: 100%;
+  }
+  .entry-eyebrow {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 600;
+  }
+  .entry-card h1 {
+    font-size: 2.1rem;
+    margin: 0 0 8px;
+    line-height: 1.15;
+  }
+  .entry-subtitle {
+    color: var(--muted);
+    margin: 0 0 32px;
+    font-size: 1.05rem;
+    font-style: italic;
+  }
+  .entry-info {
+    text-align: left;
+    background: #F5EFE3;
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    margin: 0 0 28px;
+    font-size: 0.95rem;
+  }
+  .entry-info ul { margin: 8px 0 0; padding-left: 20px; }
+  .entry-info li { margin: 4px 0; }
+  .entry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+  }
+  .entry-form label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .entry-form input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    font-size: 1.05rem;
+    background: #FFFFFF;
+    color: var(--ink);
+    font-family: Georgia, serif;
+  }
+  .entry-form input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #FFFFFF;
+    border: none;
+    padding: 14px 32px;
+    font-size: 1.05rem;
+    border-radius: 2px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: background 0.15s ease;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
+  .btn-primary:disabled { background: #B8B0A1; cursor: not-allowed; }
+  .entry-error {
+    color: var(--red);
+    font-size: 0.9rem;
+    margin-top: 8px;
+    min-height: 1.2em;
+  }
+
+  /* ============================================================
+     TEST SCREEN
+     ============================================================ */
+  #test-screen {
+    padding: 0;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+  }
+  .test-header {
+    background: var(--ink);
+    color: #FBF8F2;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header-left {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .header-left strong { color: #FBF8F2; }
+  .header-left .student-info { opacity: 0.7; margin-left: 16px; font-size: 0.85rem; text-transform: none; letter-spacing: 0; }
+  .timer {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.08);
+    padding: 6px 14px;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+  .timer.warning {
+    background: var(--gold);
+    color: #0E2536;
+    animation: timerPulse 1s ease-in-out infinite;
+  }
+  @keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  .test-body {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 0;
+  }
+  @media (max-width: 900px) {
+    .test-body { grid-template-columns: 1fr; }
+    #palette { order: -1; }
+  }
+
+  /* ===== Question column ===== */
+  #question-area {
+    padding: 32px 48px;
+    max-width: 780px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  @media (max-width: 600px) {
+    #question-area { padding: 24px 20px; }
+  }
+  .q-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 8px;
+    margin-bottom: 24px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .q-num {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  .q-meta-right {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .q-points {
+    background: var(--ink);
+    color: #FBF8F2;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-left: 8px;
+    font-weight: 600;
+  }
+  .q-text {
+    font-size: 1.18rem;
+    line-height: 1.65;
+    margin: 0 0 28px;
+  }
+  .q-text strong { font-weight: 600; }
+  .q-instruction {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 16px;
+  }
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: #FFFFFF;
+    cursor: pointer;
+    transition: border-color 0.12s ease, background 0.12s ease;
+    font-size: 1.05rem;
+  }
+  .choice:hover { border-color: var(--ink); }
+  .choice.selected {
+    border-color: var(--accent);
+    background: #FAF1EE;
+    border-width: 2px;
+    padding: 13px 17px;
+  }
+  .choice-bubble {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    background: #FFFFFF;
+    margin-top: 1px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .choice.selected .choice-bubble {
+    background: var(--accent);
+    color: #FFFFFF;
+    border-color: var(--accent);
+  }
+  /* Multi-select uses square */
+  .choice.multi .choice-bubble { border-radius: 3px; font-size: 0; }
+  .choice.multi.selected .choice-bubble::after {
+    content: '✓';
+    color: #FFFFFF;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .q-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--line);
+    padding-top: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    padding: 10px 22px;
+    font-size: 0.95rem;
+    border-radius: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    transition: all 0.15s ease;
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--ink);
+    color: #FBF8F2;
+  }
+  .btn-secondary:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .btn-flag {
+    background: transparent;
+    border: 1px solid var(--flag);
+    color: #8B6A1F;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    border-radius: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+  .btn-flag:hover { background: #FBF1D6; }
+  .btn-flag.flagged {
+    background: var(--flag);
+    color: #2A1F00;
+    border-color: var(--flag);
+  }
+
+  /* ===== Palette ===== */
+  #palette {
+    background: #F0E8D7;
+    border-left: 1px solid var(--line);
+    padding: 24px 20px;
+    position: sticky;
+    top: 60px;
+    align-self: start;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  #palette h3 {
+    margin: 0 0 4px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .palette-section-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 16px 0 8px;
+    font-weight: 700;
+  }
+  .palette-section-label:first-of-type { margin-top: 12px; }
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+  .palette-cell {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFFFFF;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.1s ease;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .palette-cell:hover { border-color: var(--ink); }
+  .palette-cell.answered {
+    background: var(--ink);
+    color: #FBF8F2;
+    border-color: var(--ink);
+  }
+  .palette-cell.current {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .palette-cell.flagged::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 6px;
+    height: 6px;
+    background: var(--flag);
+    border-radius: 50%;
+  }
+  .palette-cell.locked {
+    background: #E8E0CF;
+    color: #999;
+    cursor: not-allowed;
+  }
+  .palette-cell.locked.answered {
+    background: #5C6B78;
+    color: #FBF8F2;
+  }
+
+  .palette-legend {
+    margin-top: 20px;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    border: 1px solid var(--line);
+  }
+  .legend-swatch.answered { background: var(--ink); border-color: var(--ink); }
+  .legend-swatch.flagged { background: #FFFFFF; position: relative; }
+  .legend-swatch.flagged::after {
+    content: '';
+    position: absolute;
+    top: 1px; right: 1px;
+    width: 4px; height: 4px;
+    background: var(--flag);
+    border-radius: 50%;
+  }
+
+  .palette-submit {
+    margin-top: 20px;
+    width: 100%;
+    background: var(--accent);
+    color: #FFFFFF;
+    border: none;
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    border-radius: 2px;
+    text-transform: uppercase;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .palette-submit:hover { background: var(--accent-dark); }
+
+  /* ============================================================
+     BREAK SCREEN
+     ============================================================ */
+  #break-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--ink);
+    color: #FBF8F2;
+  }
+  .break-card {
+    max-width: 520px;
+    padding: 48px;
+  }
+  .break-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.8rem;
+    color: var(--gold);
+    margin-bottom: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+  }
+  .break-card h2 {
+    font-size: 2.4rem;
+    margin: 0 0 16px;
+    color: #FBF8F2;
+  }
+  .break-card p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 32px;
+    color: #D8CFC0;
+  }
+  .break-timer {
+    font-family: 'Courier New', monospace;
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin: 24px 0;
+    letter-spacing: 0.05em;
+  }
+  .break-skip {
+    background: transparent;
+    border: 1px solid #FBF8F2;
+    color: #FBF8F2;
+    padding: 10px 24px;
+    font-size: 0.9rem;
+    border-radius: 2px;
+    margin-top: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .break-skip:hover { background: #FBF8F2; color: var(--ink); }
+
+  /* ============================================================
+     RESULTS SCREEN
+     ============================================================ */
+  #results-screen { padding: 0; }
+  .results-header {
+    background: var(--ink);
+    color: #FBF8F2;
+    padding: 32px 24px;
+    text-align: center;
+  }
+  .results-header h1 {
+    font-size: 2.2rem;
+    margin: 0;
+    color: #FBF8F2;
+  }
+  .results-header .student-line {
+    margin-top: 8px;
+    color: #D8CFC0;
+    font-style: italic;
+  }
+  .results-body {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+
+  .badge-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--accent);
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow);
+  }
+  .badge-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .badge-level {
+    font-size: 2.6rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+    line-height: 1.1;
+  }
+  .badge-score {
+    font-size: 1.1rem;
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .badge-score strong { color: var(--ink); font-weight: 700; }
+  .badge-percent {
+    font-family: 'Courier New', monospace;
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-top: 12px;
+    line-height: 1;
+  }
+
+  .level-beginning .badge-percent,
+  .level-beginning { --level-color: #B84A3D; }
+  .level-developing .badge-percent { color: #C99A2C; }
+  .level-proficient .badge-percent { color: #3F7E4F; }
+  .level-distinguished .badge-percent { color: #2A5A8A; }
+  .level-developing { border-top-color: #C99A2C; }
+  .level-proficient { border-top-color: #3F7E4F; }
+  .level-distinguished { border-top-color: #2A5A8A; }
+
+  .results-section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+  .results-section h2 {
+    margin: 0 0 20px;
+    font-size: 1.4rem;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 10px;
+  }
+
+  /* Domain bar chart (CSS only) */
+  .domain-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .domain-bar-row {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .domain-bar-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .domain-bar-label .pct {
+    font-family: 'Courier New', monospace;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .domain-bar-track {
+    height: 24px;
+    background: #F0E8D7;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .domain-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.8s ease-out;
+  }
+  .domain-bar-fill.high { background: var(--green); }
+  .domain-bar-fill.mid { background: var(--gold); }
+  .domain-bar-fill.low { background: var(--red); }
+  .domain-bar-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* Answer review */
+  .review-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 8px;
+  }
+  .review-cell {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.78rem;
+    padding: 4px;
+    background: #FFFFFF;
+  }
+  .review-cell.correct {
+    background: #EBF3ED;
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .review-cell.partial {
+    background: #FBF3DC;
+    border-color: var(--gold);
+    color: #6E5318;
+  }
+  .review-cell.incorrect {
+    background: #F7E5E2;
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .review-cell .num { font-weight: 700; font-size: 0.95rem; }
+  .review-cell .mark { font-size: 1.1rem; line-height: 1; }
+  .review-cell .std { font-size: 0.65rem; opacity: 0.8; }
+  .review-legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .review-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .review-legend .dot {
+    width: 12px; height: 12px; border-radius: 2px; border: 1px solid var(--line);
+  }
+  .review-legend .dot.correct { background: #EBF3ED; border-color: var(--green); }
+  .review-legend .dot.partial { background: #FBF3DC; border-color: var(--gold); }
+  .review-legend .dot.incorrect { background: #F7E5E2; border-color: var(--red); }
+
+  /* Flagged list */
+  .flagged-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .flagged-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: #FBF3DC;
+    border-left: 3px solid var(--flag);
+    border-radius: 2px;
+    font-size: 0.95rem;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .flagged-item .qnum {
+    font-weight: 700;
+    background: var(--flag);
+    color: #2A1F00;
+    padding: 2px 8px;
+    border-radius: 2px;
+    min-width: 36px;
+    text-align: center;
+  }
+  .flagged-item .domain { color: var(--muted); font-style: italic; }
+  .no-flags {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  .submit-status {
+    margin-top: 24px;
+    padding: 14px 18px;
+    font-size: 0.9rem;
+    text-align: center;
+    border-radius: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .submit-status.success { background: #EBF3ED; color: var(--green); border: 1px solid var(--green); }
+  .submit-status.pending { background: #F0E8D7; color: var(--muted); border: 1px solid var(--line); }
+  .submit-status.error { background: #F7E5E2; color: var(--red); border: 1px solid var(--red); }
+
+  /* ============================================================
+     FRACTIONS (vertical bar)
+     ============================================================ */
+  .frac {
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: -0.45em;
+    text-align: center;
+    line-height: 1.05;
+    font-size: 0.92em;
+    margin: 0 1px;
+  }
+  .frac > span:first-child {
+    border-bottom: 1.2px solid currentColor;
+    padding: 0 3px 1px;
+  }
+  .frac > span:last-child { padding: 1px 3px 0; }
+
+  /* Modal confirm */
+  .modal-back {
+    position: fixed; inset: 0;
+    background: rgba(14,37,54,0.55);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+  }
+  .modal-back[hidden] { display: none; }
+  .modal {
+    background: var(--card);
+    padding: 32px;
+    max-width: 440px;
+    width: calc(100% - 48px);
+    border-radius: 4px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    text-align: center;
+  }
+  .modal h3 { margin: 0 0 12px; font-size: 1.4rem; }
+  .modal p { margin: 0 0 24px; color: var(--muted); }
+  .modal-actions { display: flex; gap: 12px; justify-content: center; }
+  .btn-cancel {
+    background: transparent;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    border-radius: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     ENTRY SCREEN
+============================================================ -->
+<div id="entry-screen" class="screen">
+  <div class="entry-card">
+    <div class="entry-eyebrow">Georgia Milestones Practice</div>
+    <h1>Grade 5 Mathematics<br>End-of-Grade Simulation</h1>
+    <p class="entry-subtitle">A two-section practice test built from the official blueprint.</p>
+
+    <div class="entry-info">
+      <strong>Before you begin:</strong>
+      <ul>
+        <li>50 questions in 2 sections</li>
+        <li>50-minute total timer</li>
+        <li>2-minute break between sections</li>
+        <li>You cannot go back to Section 1 after submitting it</li>
+        <li>Use the Vocabulary Flag button to mark words you don't know</li>
+      </ul>
+    </div>
+
+    <div class="entry-form">
+      <div>
+        <label for="student-name">Your full name</label>
+        <input type="text" id="student-name" autocomplete="off" maxlength="80">
+      </div>
+      <div>
+        <label for="student-period">Class period</label>
+        <input type="text" id="student-period" autocomplete="off" maxlength="20" placeholder="e.g., 3rd period">
+      </div>
+      <div class="entry-error" id="entry-error"></div>
+      <button class="btn-primary" id="begin-test">Begin Test</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TEST SCREEN
+============================================================ -->
+<div id="test-screen" class="screen" hidden>
+  <header class="test-header">
+    <div class="header-left">
+      <strong id="section-indicator">Section 1 of 2</strong>
+      <span class="student-info" id="student-info"></span>
+    </div>
+    <div class="timer" id="main-timer">50:00</div>
+  </header>
+  <div class="test-body">
+    <main id="question-area"></main>
+    <aside id="palette">
+      <h3>Question Palette</h3>
+      <div class="palette-section-label">Section 1</div>
+      <div class="palette-grid" id="palette-section-1"></div>
+      <div class="palette-section-label">Section 2</div>
+      <div class="palette-grid" id="palette-section-2"></div>
+
+      <div class="palette-legend">
+        <div class="legend-row"><span class="legend-swatch"></span> Unanswered</div>
+        <div class="legend-row"><span class="legend-swatch answered"></span> Answered</div>
+        <div class="legend-row"><span class="legend-swatch flagged"></span> Vocab flagged</div>
+      </div>
+
+      <button class="palette-submit" id="palette-submit">Submit Section</button>
+    </aside>
+  </div>
+</div>
+
+<!-- ============================================================
+     BREAK SCREEN
+============================================================ -->
+<div id="break-screen" class="screen" hidden>
+  <div class="break-card">
+    <div class="break-eyebrow">Section 1 Complete</div>
+    <h2>Take a short break.</h2>
+    <p>Stand up, stretch, take a few deep breaths. Section 2 will begin automatically when the timer runs out.</p>
+    <div class="break-timer" id="break-timer">02:00</div>
+    <button class="break-skip" id="break-skip">Skip Break and Begin Section 2</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     RESULTS SCREEN
+============================================================ -->
+<div id="results-screen" class="screen" hidden>
+  <div class="results-header">
+    <h1>Your Results</h1>
+    <div class="student-line" id="results-student-line"></div>
+  </div>
+  <div class="results-body">
+
+    <div class="badge-card" id="badge-card">
+      <div class="badge-eyebrow">Achievement Level</div>
+      <div class="badge-level" id="badge-level">--</div>
+      <div class="badge-percent" id="badge-percent">0%</div>
+      <div class="badge-score">Score: <strong id="badge-score">0 / 58</strong></div>
+    </div>
+
+    <div class="results-section">
+      <h2>Performance by Domain</h2>
+      <div class="domain-chart" id="domain-chart"></div>
+    </div>
+
+    <div class="results-section">
+      <h2>Answer Review</h2>
+      <div class="review-legend">
+        <span><span class="dot correct"></span> Correct</span>
+        <span><span class="dot partial"></span> Partial Credit</span>
+        <span><span class="dot incorrect"></span> Incorrect</span>
+      </div>
+      <div class="review-grid" id="review-grid" style="margin-top:14px"></div>
+    </div>
+
+    <div class="results-section">
+      <h2>Flagged Vocabulary</h2>
+      <div id="flagged-display"></div>
+    </div>
+
+    <div class="submit-status pending" id="submit-status">Submitting your results...</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     CONFIRM MODAL
+============================================================ -->
+<div class="modal-back" id="modal-back" hidden>
+  <div class="modal">
+    <h3 id="modal-title">Submit Section 1?</h3>
+    <p id="modal-text">You have unanswered questions. Once you submit, you cannot return to Section 1.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="modal-cancel">Go Back</button>
+      <button class="btn-primary" id="modal-confirm">Submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURATION
+============================================================ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby6DB_aUlZMWcG6cSX7tPziX-9mLPi4faD5Xr0H-pdOTz4fwAGVgOV7KCJJTGT1eg0H/exec';
+
+// Achievement-level cuts (raw percentage). The ALD does not publish numeric
+// raw-score cuts; these are placeholders. Edit to recalibrate.
+const ACHIEVEMENT_CUTS = {
+  developing: 0.40,
+  proficient: 0.70,
+  distinguished: 0.85
+};
+
+// Test timing
+const TOTAL_TEST_SECONDS = 50 * 60;   // 50 minutes
+const BREAK_SECONDS      = 2 * 60;    // 2 minutes
+const WARNING_SECONDS    = 5 * 60;    // turn gold at 5 min remaining
+
+const REPORTING_CATEGORIES = [
+  'Numerical Reasoning',
+  'Patterning & Algebraic Reasoning',
+  'Measurement & Data Reasoning',
+  'Geometric & Spatial Reasoning'
+];
+
+const STD_TO_CATEGORY = {
+  '5.NR.1': 'Numerical Reasoning',
+  '5.NR.2': 'Numerical Reasoning',
+  '5.NR.3': 'Numerical Reasoning',
+  '5.NR.4': 'Numerical Reasoning',
+  '5.NR.5': 'Numerical Reasoning',
+  '5.PAR.6': 'Patterning & Algebraic Reasoning',
+  '5.MDR.7': 'Measurement & Data Reasoning',
+  '5.GSR.8': 'Geometric & Spatial Reasoning'
+};
+
+/* ============================================================
+   QUESTION BANK
+   Built directly from uploaded blueprint, standards, and ALDs.
+   Per-section/category/DOK distribution mirrors the blueprint.
+============================================================ */
+const FRAC = (n, d) => `<span class="frac"><span>${n}</span><span>${d}</span></span>`;
+const MIX = (w, n, d) => `${w}${FRAC(n, d)}`;
+
+const QUESTIONS = [
+  // ============== SECTION 1 (25 items, 29 points) ==============
+
+  // ---- 5.NR.1 / 5.NR.4 group: place value & decimals (7 pts) ----
+  { number: 1, section: 1, standard: '5.NR.1.1', dok: 1, points: 1, type: 'mc',
+    text: 'In the number 4,488, how does the value of the digit 4 in the thousands place compare to the value of the digit 4 in the hundreds place?',
+    choices: [
+      'It is 100 times as much.',
+      'It is 10 times as much.',
+      `It is ${FRAC(1,10)} as much.`,
+      `It is ${FRAC(1,100)} as much.`
+    ],
+    correct: 1
+  },
+  { number: 2, section: 1, standard: '5.NR.1.2', dok: 1, points: 1, type: 'mc',
+    text: 'What is 32 &times; 10<sup>3</sup>?',
+    choices: ['320', '3,200', '32,000', '320,000'],
+    correct: 2
+  },
+  { number: 3, section: 1, standard: '5.NR.4.1', dok: 1, points: 1, type: 'mc',
+    text: 'Which expression shows 7.052 written in expanded form?',
+    choices: [
+      `7 + ${FRAC(5,10)} + ${FRAC(2,100)}`,
+      `7 + ${FRAC(5,100)} + ${FRAC(2,1000)}`,
+      `7 + ${FRAC(50,100)} + ${FRAC(2,1000)}`,
+      `70 + ${FRAC(5,100)} + ${FRAC(2,1000)}`
+    ],
+    correct: 1
+  },
+  { number: 4, section: 1, standard: '5.NR.4.2', dok: 1, points: 1, type: 'mc',
+    text: 'Which symbol makes the statement true? <strong>0.78 ___ 0.780</strong>',
+    choices: ['&gt;', '&lt;', '=', 'None of these'],
+    correct: 2
+  },
+  { number: 5, section: 1, standard: '5.NR.4.3', dok: 1, points: 1, type: 'mc',
+    text: 'Round <strong>4.376</strong> to the nearest hundredth.',
+    choices: ['4.30', '4.37', '4.38', '4.40'],
+    correct: 2
+  },
+  { number: 6, section: 1, standard: '5.NR.4.4', dok: 1, points: 1, type: 'mc',
+    text: 'What is <strong>12.45 + 7.8</strong>?',
+    choices: ['19.25', '19.53', '20.25', '91.45'],
+    correct: 2
+  },
+  { number: 7, section: 1, standard: '5.NR.4.4', dok: 2, points: 1, type: 'mc',
+    text: 'A bottle holds 1.25 liters of juice. Daniel pours 0.4 liter into a glass. How much juice is left in the bottle?',
+    choices: ['0.21 liter', '0.85 liter', '1.21 liters', '1.65 liters'],
+    correct: 1
+  },
+
+  // ---- 5.NR.3 group: fractions (7 pts, 1 two-pt) ----
+  { number: 8, section: 1, standard: '5.NR.3.1', dok: 2, points: 1, type: 'mc',
+    text: 'Six friends share 4 granola bars equally. How much does each friend get?',
+    choices: [
+      `${FRAC(4,6)} of a bar`,
+      `${FRAC(6,4)} of a bar`,
+      `${MIX(1,1,2)} bars`,
+      '24 bars'
+    ],
+    correct: 0
+  },
+  { number: 9, section: 1, standard: '5.NR.3.2', dok: 2, points: 1, type: 'mc',
+    text: `Three students each ate part of an identical sandwich. Maria ate ${FRAC(3,4)}, Tia ate ${FRAC(5,8)}, and Leo ate ${FRAC(2,3)}. Who ate the most?`,
+    choices: ['Maria', 'Tia', 'Leo', 'They all ate the same amount.'],
+    correct: 0
+  },
+  { number: 10, section: 1, standard: '5.NR.3.3', dok: 2, points: 1, type: 'mc',
+    text: `What is ${FRAC(2,3)} + ${FRAC(1,4)}?`,
+    choices: [`${FRAC(3,7)}`, `${FRAC(3,12)}`, `${FRAC(8,12)}`, `${FRAC(11,12)}`],
+    correct: 3
+  },
+  { number: 11, section: 1, standard: '5.NR.3.3', dok: 2, points: 2, type: 'multi',
+    text: `Select <strong>ALL</strong> expressions equivalent to ${MIX(3,1,2)} &minus; ${MIX(1,3,4)}.`,
+    instruction: 'Choose 2 answers.',
+    choices: [`${MIX(1,3,4)}`, `${FRAC(7,4)}`, `${MIX(2,1,4)}`, `${MIX(4,1,4)}`, `${MIX(1,1,4)}`],
+    correct: [0, 1],
+    selectCount: 2
+  },
+  { number: 12, section: 1, standard: '5.NR.3.4', dok: 2, points: 1, type: 'mc',
+    text: `Mr. Garcia is making 8 servings of soup. Each serving uses ${FRAC(3,4)} cup of broth. How many cups of broth does he need in total?`,
+    choices: ['6 cups', `${FRAC(32,3)} cups`, `${MIX(8,3,4)} cups`, '24 cups'],
+    correct: 0
+  },
+  { number: 13, section: 1, standard: '5.NR.3.5', dok: 2, points: 1, type: 'mc',
+    text: `A whole number is multiplied by ${FRAC(7,8)}. Which statement is <strong>true</strong> about the product?`,
+    choices: [
+      'The product is greater than the original number.',
+      'The product is equal to the original number.',
+      'The product is less than the original number.',
+      'The product is zero.'
+    ],
+    correct: 2
+  },
+  { number: 14, section: 1, standard: '5.NR.3.6', dok: 2, points: 1, type: 'mc',
+    text: `Three friends share ${FRAC(1,2)} pound of trail mix equally. How much does each friend get?`,
+    choices: [`${FRAC(1,3)} pound`, `${FRAC(1,5)} pound`, `${FRAC(1,6)} pound`, `${FRAC(3,2)} pounds`],
+    correct: 2
+  },
+
+  // ---- 5.NR.2 / 5.NR.5 group: ops & expressions (5 pts, 1 two-pt) ----
+  { number: 15, section: 1, standard: '5.NR.2.1', dok: 1, points: 1, type: 'mc',
+    text: 'What is <strong>247 &times; 38</strong>?',
+    choices: ['1,976', '8,386', '9,376', '9,386'],
+    correct: 3
+  },
+  { number: 16, section: 1, standard: '5.NR.2.1', dok: 3, points: 2, type: 'multi',
+    text: 'A school orders 24 boxes of pencils. Each box contains 144 pencils. The pencils are then divided equally among 18 classrooms.',
+    instruction: 'Select 2 true statements.',
+    choices: [
+      'The total number of pencils is 2,592.',
+      'The total number of pencils is 3,456.',
+      'Each classroom receives 18 pencils.',
+      'Each classroom receives 144 pencils.',
+      'Each classroom receives 192 pencils.'
+    ],
+    correct: [1, 4],
+    selectCount: 2
+  },
+  { number: 17, section: 1, standard: '5.NR.2.2', dok: 1, points: 1, type: 'mc',
+    text: 'What is <strong>1,728 &divide; 24</strong>?',
+    choices: ['62', '72', '82', '720'],
+    correct: 1
+  },
+  { number: 18, section: 1, standard: '5.NR.5.1', dok: 2, points: 1, type: 'mc',
+    text: `Which expression represents the words "<em>multiply 6 by the sum of 4 and 9</em>"?`,
+    choices: ['6 &times; 4 + 9', '6 &times; (4 + 9)', '(6 &times; 4) + 9', '6 + (4 &times; 9)'],
+    correct: 1
+  },
+
+  // ---- 5.PAR.6: patterns and coordinates (3 pts, 1 two-pt) ----
+  { number: 19, section: 1, standard: '5.PAR.6.1', dok: 2, points: 2, type: 'multi',
+    text: `Pattern A follows the rule "add 3" starting from 0. The first 5 terms are: 0, 3, 6, 9, 12.<br>Pattern B follows the rule "add 6" starting from 0. The first 5 terms are: 0, 6, 12, 18, 24.`,
+    instruction: 'Select 2 true statements.',
+    choices: [
+      'The 6th term of Pattern A is 18.',
+      'The 6th term of Pattern B is 30.',
+      'Each term in Pattern B is 3 more than the corresponding term in Pattern A.',
+      'Each term in Pattern B is twice the corresponding term in Pattern A.',
+      'Pattern A grows faster than Pattern B.'
+    ],
+    correct: [1, 3],
+    selectCount: 2
+  },
+  { number: 20, section: 1, standard: '5.PAR.6.2', dok: 1, points: 1, type: 'mc',
+    text: 'Point P is located 3 units to the right and 5 units up from the origin. What are the coordinates of P?',
+    choices: ['(0, 5)', '(3, 0)', '(3, 5)', '(5, 3)'],
+    correct: 2
+  },
+
+  // ---- 5.MDR.7: measurement & data (4 pts, 1 two-pt) ----
+  { number: 21, section: 1, standard: '5.MDR.7.1', dok: 1, points: 1, type: 'mc',
+    text: 'Which unit is <strong>best</strong> for measuring the length of a swimming pool?',
+    choices: ['Millimeters', 'Centimeters', 'Meters', 'Kilometers'],
+    correct: 2
+  },
+  { number: 22, section: 1, standard: '5.MDR.7.3', dok: 3, points: 2, type: 'multi',
+    text: 'A recipe calls for 2,500 milliliters of water. Sara has a 1-liter bottle and a 750-milliliter bottle. (1 L = 1,000 mL)',
+    instruction: 'Select 2 true statements.',
+    choices: [
+      '2,500 mL = 25 L',
+      '2,500 mL = 2.5 L',
+      'The two bottles together hold 1.75 L, which is enough water.',
+      'The two bottles together hold 1.75 L, which is NOT enough water.',
+      'The two bottles together hold 17.5 L.'
+    ],
+    correct: [1, 3],
+    selectCount: 2
+  },
+  { number: 23, section: 1, standard: '5.MDR.7.4', dok: 1, points: 1, type: 'mc',
+    text: 'Conversion: 1 gallon = 4 quarts. How many quarts are in 5 gallons?',
+    choices: ['9', '16', '20', '24'],
+    correct: 2
+  },
+
+  // ---- 5.GSR.8: geometry (3 pts) ----
+  { number: 24, section: 1, standard: '5.GSR.8.1', dok: 1, points: 1, type: 'mc',
+    text: 'Which statement about a square is <strong>always</strong> true?',
+    choices: [
+      'A square has exactly 3 sides.',
+      'A square has 4 sides of equal length and 4 right angles.',
+      'A square has 4 sides but no right angles.',
+      'A square is a type of triangle.'
+    ],
+    correct: 1
+  },
+  { number: 25, section: 1, standard: '5.GSR.8.4', dok: 1, points: 1, type: 'mc',
+    text: 'A rectangular prism has a base area of 18 square inches and a height of 4 inches. What is its volume?',
+    choices: ['22 cubic inches', '36 cubic inches', '72 cubic inches', '144 cubic inches'],
+    correct: 2
+  },
+
+  // ============== SECTION 2 (25 items, 29 points) ==============
+
+  // ---- 5.NR.1 / 5.NR.4 (7 pts) ----
+  { number: 26, section: 2, standard: '5.NR.1.1', dok: 1, points: 1, type: 'mc',
+    text: 'What is the value of the digit 5 in the number <strong>0.0589</strong>?',
+    choices: ['5 tenths', '5 hundredths', '5 thousandths', '5 ones'],
+    correct: 1
+  },
+  { number: 27, section: 2, standard: '5.NR.1.2', dok: 2, points: 1, type: 'mc',
+    text: 'Anna has 4,800 grams of flour. She divides it into bags of equal weight, each holding 10<sup>2</sup> grams. How many bags does she fill?',
+    choices: ['4', '48', '480', '4,800'],
+    correct: 1
+  },
+  { number: 28, section: 2, standard: '5.NR.4.1', dok: 1, points: 1, type: 'mc',
+    text: `Which decimal is the standard form of "8 + ${FRAC(4,10)} + ${FRAC(6,1000)}"?`,
+    choices: ['8.046', '8.406', '8.460', '84.06'],
+    correct: 1
+  },
+  { number: 29, section: 2, standard: '5.NR.4.2', dok: 2, points: 1, type: 'mc',
+    text: 'Which list shows the decimals in order from <strong>least to greatest</strong>?',
+    choices: [
+      '0.054, 0.405, 0.45, 0.5',
+      '0.054, 0.45, 0.405, 0.5',
+      '0.054, 0.5, 0.405, 0.45',
+      '0.5, 0.45, 0.405, 0.054'
+    ],
+    correct: 0
+  },
+  { number: 30, section: 2, standard: '5.NR.4.3', dok: 1, points: 1, type: 'mc',
+    text: 'What is <strong>5.762</strong> rounded to the nearest hundredth?',
+    choices: ['5.70', '5.76', '5.77', '5.80'],
+    correct: 1
+  },
+  { number: 31, section: 2, standard: '5.NR.4.4', dok: 2, points: 1, type: 'mc',
+    text: 'Jenna ran 3.25 miles on Monday and 2.8 miles on Tuesday. How many miles did she run in all?',
+    choices: ['5.05 miles', '5.13 miles', '6.05 miles', '6.33 miles'],
+    correct: 2
+  },
+  { number: 32, section: 2, standard: '5.NR.4.4', dok: 1, points: 1, type: 'mc',
+    text: 'What is <strong>8.4 &minus; 2.67</strong>?',
+    choices: ['5.73', '5.83', '5.87', '6.27'],
+    correct: 0
+  },
+
+  // ---- 5.NR.3 (7 pts, 1 two-pt) ----
+  { number: 33, section: 2, standard: '5.NR.3.1', dok: 1, points: 1, type: 'mc',
+    text: 'Which expression is equivalent to <strong>7 &divide; 5</strong>?',
+    choices: [`${FRAC(1,35)}`, `${FRAC(5,7)}`, `${FRAC(7,5)}`, '35'],
+    correct: 2
+  },
+  { number: 34, section: 2, standard: '5.NR.3.2', dok: 2, points: 1, type: 'mc',
+    text: `Which fraction is <strong>greater than</strong> ${FRAC(5,8)}?`,
+    choices: [`${FRAC(1,2)}`, `${FRAC(3,8)}`, `${FRAC(4,8)}`, `${FRAC(7,10)}`],
+    correct: 3
+  },
+  { number: 35, section: 2, standard: '5.NR.3.3', dok: 2, points: 1, type: 'mc',
+    text: `Lucas walks ${MIX(2,1,4)} miles to school and ${MIX(1,1,2)} miles to the park. How many miles does he walk in total?`,
+    choices: [`${MIX(3,1,4)} miles`, `${MIX(3,2,6)} miles`, `${MIX(3,3,4)} miles`, `${MIX(4,1,4)} miles`],
+    correct: 2
+  },
+  { number: 36, section: 2, standard: '5.NR.3.4', dok: 2, points: 1, type: 'mc',
+    text: `What is <strong>5 &times; ${FRAC(2,3)}</strong>?`,
+    choices: [`${FRAC(7,3)}`, `${FRAC(5,6)}`, `${FRAC(6,15)}`, `${FRAC(10,3)}`],
+    correct: 3
+  },
+  { number: 37, section: 2, standard: '5.NR.3.5', dok: 2, points: 1, type: 'mc',
+    text: 'Mark multiplied 24 by a fraction and the product was <strong>greater than</strong> 24. Which fraction could Mark have used?',
+    choices: [`${FRAC(1,2)}`, `${FRAC(3,4)}`, `${FRAC(4,4)}`, `${FRAC(5,3)}`],
+    correct: 3
+  },
+  { number: 38, section: 2, standard: '5.NR.3.6', dok: 2, points: 2, type: 'multi',
+    text: `Mr. Lee has 4 yards of ribbon. He cuts it into pieces that are each ${FRAC(1,3)} yard long.`,
+    instruction: 'Select 2 true statements.',
+    choices: [
+      `The expression 4 &times; ${FRAC(1,3)} represents this situation.`,
+      `The expression 4 &divide; ${FRAC(1,3)} represents this situation.`,
+      'Mr. Lee has 12 pieces of ribbon.',
+      `Mr. Lee has ${FRAC(4,3)} pieces of ribbon.`,
+      'Mr. Lee has 7 pieces of ribbon.'
+    ],
+    correct: [1, 2],
+    selectCount: 2
+  },
+
+  // ---- 5.NR.2 / 5.NR.5 (5 pts, 1 two-pt) ----
+  { number: 39, section: 2, standard: '5.NR.2.1', dok: 2, points: 1, type: 'mc',
+    text: 'A theater has 156 rows of seats. Each row has 24 seats. How many seats are in the theater?',
+    choices: ['624', '3,544', '3,744', '4,344'],
+    correct: 2
+  },
+  { number: 40, section: 2, standard: '5.NR.2.2', dok: 3, points: 2, type: 'multi',
+    text: 'A factory produces 4,608 toys in a week. The toys are packed into boxes that hold 16 toys each. The boxes are then loaded onto trucks that hold 24 boxes each.',
+    instruction: 'Select 2 true statements.',
+    choices: [
+      'The factory fills 192 boxes.',
+      'The factory fills 288 boxes.',
+      'The factory fills exactly 12 trucks.',
+      'The factory fills exactly 18 trucks.',
+      'The factory needs more than 24 trucks.'
+    ],
+    correct: [1, 2],
+    selectCount: 2
+  },
+  { number: 41, section: 2, standard: '5.NR.5.1', dok: 2, points: 1, type: 'mc',
+    text: 'Evaluate the expression: <strong>4 &times; (15 &minus; 7) + 6</strong>',
+    choices: ['26', '32', '38', '56'],
+    correct: 2
+  },
+  { number: 42, section: 2, standard: '5.NR.5.1', dok: 2, points: 1, type: 'mc',
+    text: 'Which expression represents "<em>5 less than the product of 8 and 6</em>"?',
+    choices: ['(8 &times; 6) &minus; 5', '8 &times; (6 &minus; 5)', '5 &minus; (8 &times; 6)', '8 &minus; (6 &times; 5)'],
+    correct: 0
+  },
+
+  // ---- 5.PAR.6 (3 pts, 1 two-pt) ----
+  { number: 43, section: 2, standard: '5.PAR.6.1', dok: 2, points: 1, type: 'mc',
+    text: `Pattern X follows the rule "add 5" starting at 0. Pattern Y follows the rule "add 10" starting at 0. What is the relationship between corresponding terms?`,
+    choices: [
+      'Each term in Y is 5 more than the corresponding term in X.',
+      'Each term in Y is twice the corresponding term in X.',
+      'Each term in X is twice the corresponding term in Y.',
+      'The corresponding terms are equal.'
+    ],
+    correct: 1
+  },
+  { number: 44, section: 2, standard: '5.PAR.6.2', dok: 2, points: 2, type: 'multi',
+    text: 'Mia tracks the number of laps she runs each day on a coordinate plane. The point (3, 9) shows that on Day 3 she ran 9 laps.',
+    instruction: 'Select 2 true statements.',
+    choices: [
+      'The first coordinate represents the number of laps.',
+      'The first coordinate represents the day number.',
+      'The point (5, 9) would mean she ran 9 laps on Day 5.',
+      'The points (9, 3) and (3, 9) represent the same situation.',
+      'On Day 0, Mia must have run 3 laps.'
+    ],
+    correct: [1, 2],
+    selectCount: 2
+  },
+
+  // ---- 5.MDR.7 (3 pts) ----
+  { number: 45, section: 2, standard: '5.MDR.7.1', dok: 1, points: 1, type: 'mc',
+    text: 'Which unit is <strong>best</strong> for measuring the mass of a paper clip?',
+    choices: ['Kilograms', 'Grams', 'Liters', 'Milliliters'],
+    correct: 1
+  },
+  { number: 46, section: 2, standard: '5.MDR.7.3', dok: 2, points: 1, type: 'mc',
+    text: 'A water tank holds 6.4 kiloliters of water. How many liters does the tank hold? (1 kL = 1,000 L)',
+    choices: ['64 L', '640 L', '6,400 L', '64,000 L'],
+    correct: 2
+  },
+  { number: 47, section: 2, standard: '5.MDR.7.4', dok: 1, points: 1, type: 'mc',
+    text: 'Conversion: 1 pound = 16 ounces. A bag of dog food weighs 5 pounds. How many ounces does it weigh?',
+    choices: ['11 ounces', '21 ounces', '80 ounces', '160 ounces'],
+    correct: 2
+  },
+
+  // ---- 5.GSR.8 (4 pts, 1 two-pt) ----
+  { number: 48, section: 2, standard: '5.GSR.8.1', dok: 2, points: 1, type: 'mc',
+    text: 'A quadrilateral has exactly one pair of parallel sides. What type of polygon is it?',
+    choices: ['Rectangle', 'Parallelogram', 'Trapezoid', 'Rhombus'],
+    correct: 2
+  },
+  { number: 49, section: 2, standard: '5.GSR.8.2', dok: 2, points: 1, type: 'mc',
+    text: 'Which statement is <strong>true</strong>?',
+    choices: [
+      'All rectangles are squares.',
+      'All squares are rectangles.',
+      'All trapezoids are rectangles.',
+      'All triangles are quadrilaterals.'
+    ],
+    correct: 1
+  },
+  { number: 50, section: 2, standard: '5.GSR.8.4', dok: 3, points: 2, type: 'multi',
+    text: 'A box shaped like a rectangular prism has a length of 8 inches, a width of 4 inches, and a height of 6 inches.',
+    instruction: 'Select 2 true statements.',
+    choices: [
+      'The base area of the box is 24 square inches.',
+      'The base area of the box is 32 square inches.',
+      'The volume of the box is 96 cubic inches.',
+      'The volume of the box is 192 cubic inches.',
+      'The volume of the box is 18 cubic inches.'
+    ],
+    correct: [1, 3],
+    selectCount: 2
+  }
+];
+
+/* ============================================================
+   STATE
+============================================================ */
+const state = {
+  studentName: '',
+  studentPeriod: '',
+  startTime: null,
+  responses: {},   // { qNum: number | array }
+  flagged: {},     // { qNum: true }
+  currentQ: 1,
+  currentSection: 1,
+  section1Submitted: false,
+  testEnded: false,
+  mainTimerSeconds: TOTAL_TEST_SECONDS,
+  mainTimerInterval: null,
+  breakTimerInterval: null
+};
+
+/* ============================================================
+   ENTRY
+============================================================ */
+const $ = (id) => document.getElementById(id);
+
+$('begin-test').addEventListener('click', () => {
+  const name = $('student-name').value.trim();
+  const period = $('student-period').value.trim();
+  if (!name) {
+    $('entry-error').textContent = 'Please enter your full name.';
+    return;
+  }
+  if (!period) {
+    $('entry-error').textContent = 'Please enter your class period.';
+    return;
+  }
+  state.studentName = name;
+  state.studentPeriod = period;
+  state.startTime = Date.now();
+  $('entry-screen').hidden = true;
+  $('test-screen').hidden = false;
+  $('student-info').textContent = `${name} \u00B7 ${period}`;
+  buildPalettes();
+  startMainTimer();
+  showQuestion(1);
+});
+
+[$('student-name'), $('student-period')].forEach(el => {
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') $('begin-test').click(); });
+});
+
+/* ============================================================
+   TIMER
+============================================================ */
+function startMainTimer() {
+  updateMainTimerDisplay();
+  state.mainTimerInterval = setInterval(() => {
+    state.mainTimerSeconds--;
+    if (state.mainTimerSeconds <= 0) {
+      state.mainTimerSeconds = 0;
+      updateMainTimerDisplay();
+      clearInterval(state.mainTimerInterval);
+      autoSubmitOutOfTime();
+      return;
+    }
+    updateMainTimerDisplay();
+  }, 1000);
+}
+
+function pauseMainTimer() {
+  if (state.mainTimerInterval) clearInterval(state.mainTimerInterval);
+  state.mainTimerInterval = null;
+}
+
+function resumeMainTimer() {
+  if (state.mainTimerInterval) return;
+  startMainTimer();
+}
+
+function updateMainTimerDisplay() {
+  const m = Math.floor(state.mainTimerSeconds / 60);
+  const s = state.mainTimerSeconds % 60;
+  const txt = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const el = $('main-timer');
+  el.textContent = txt;
+  if (state.mainTimerSeconds <= WARNING_SECONDS) {
+    el.classList.add('warning');
+  }
+}
+
+function autoSubmitOutOfTime() {
+  if (state.testEnded) return;
+  if (!state.section1Submitted) {
+    state.section1Submitted = true;
+  }
+  finishTest();
+}
+
+/* ============================================================
+   PALETTE
+============================================================ */
+function isAccessible(q) {
+  // Section 2 is locked until Section 1 is submitted.
+  // Section 1 is locked after Section 1 is submitted.
+  if (!state.section1Submitted && q.section === 2) return false;
+  if ( state.section1Submitted && q.section === 1) return false;
+  return true;
+}
+
+function buildPalettes() {
+  const s1 = QUESTIONS.filter(q => q.section === 1);
+  const s2 = QUESTIONS.filter(q => q.section === 2);
+  $('palette-section-1').innerHTML = s1.map(paletteCellHTML).join('');
+  $('palette-section-2').innerHTML = s2.map(paletteCellHTML).join('');
+  document.querySelectorAll('.palette-cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      const n = parseInt(cell.dataset.qnum, 10);
+      const q = QUESTIONS.find(qq => qq.number === n);
+      if (!isAccessible(q)) return;
+      showQuestion(n);
+    });
+  });
+}
+
+function paletteCellHTML(q) {
+  return `<div class="palette-cell" data-qnum="${q.number}">${q.number}</div>`;
+}
+
+function refreshPalette() {
+  document.querySelectorAll('.palette-cell').forEach(cell => {
+    const n = parseInt(cell.dataset.qnum, 10);
+    const q = QUESTIONS.find(qq => qq.number === n);
+    cell.classList.toggle('answered', isAnswered(n));
+    cell.classList.toggle('flagged', !!state.flagged[n]);
+    cell.classList.toggle('current', n === state.currentQ);
+    cell.classList.toggle('locked', !isAccessible(q));
+  });
+  // Update submit button label to reflect what will actually be submitted
+  const submitBtn = $('palette-submit');
+  if (submitBtn) {
+    submitBtn.textContent = state.section1Submitted ? 'Submit Test' : 'Submit Section 1';
+  }
+  // Dim whichever section is currently locked
+  const p1 = $('palette-section-1');
+  const p2 = $('palette-section-2');
+  if (p1) p1.style.opacity = state.section1Submitted ? '0.5' : '1';
+  if (p2) p2.style.opacity = state.section1Submitted ? '1' : '0.5';
+}
+
+function isAnswered(n) {
+  const r = state.responses[n];
+  if (r === undefined || r === null) return false;
+  if (Array.isArray(r)) return r.length > 0;
+  return true;
+}
+
+/* ============================================================
+   QUESTION RENDER
+============================================================ */
+function showQuestion(n) {
+  const q = QUESTIONS.find(qq => qq.number === n);
+  if (!q) return;
+  if (!isAccessible(q)) return;
+
+  state.currentQ = n;
+  state.currentSection = q.section;
+  $('section-indicator').textContent = `Section ${q.section} of 2`;
+
+  const isMulti = q.type === 'multi';
+  const sel = state.responses[n];
+  const meta = `<div class="q-meta">
+    <div class="q-num">Question ${q.number}</div>
+    <div class="q-meta-right">
+      ${q.standard} &middot; DOK ${q.dok}
+      <span class="q-points">${q.points} pt${q.points > 1 ? 's' : ''}</span>
+    </div>
+  </div>`;
+
+  const instruction = q.instruction
+    ? `<div class="q-instruction">${q.instruction}</div>` : '';
+
+  const choicesHTML = q.choices.map((choice, i) => {
+    const letter = String.fromCharCode(65 + i);
+    let isSelected = false;
+    if (isMulti) {
+      isSelected = Array.isArray(sel) && sel.includes(i);
+    } else {
+      isSelected = sel === i;
+    }
+    return `<div class="choice ${isMulti ? 'multi' : ''} ${isSelected ? 'selected' : ''}"
+      data-idx="${i}">
+      <div class="choice-bubble">${isMulti ? '' : letter}</div>
+      <div class="choice-text">${choice}</div>
+    </div>`;
+  }).join('');
+
+  const flagged = !!state.flagged[n];
+  const accessible = QUESTIONS.filter(isAccessible);
+  const isFirstAccessible = accessible.length > 0 && accessible[0].number === n;
+  const isLastAccessible  = accessible.length > 0 && accessible[accessible.length - 1].number === n;
+  const nextLabel = isLastAccessible
+    ? (state.section1Submitted ? 'Finish Test' : 'Submit Section 1 \u2192')
+    : 'Next \u2192';
+
+  $('question-area').innerHTML = `
+    ${meta}
+    <div class="q-text">${q.text}</div>
+    ${instruction}
+    <div class="choices">${choicesHTML}</div>
+    <div class="q-controls">
+      <button class="btn-secondary" id="prev-btn" ${isFirstAccessible ? 'disabled' : ''}>&larr; Previous</button>
+      <button class="btn-flag ${flagged ? 'flagged' : ''}" id="flag-btn">
+        ${flagged ? '\u2691 Vocab Flagged' : '\u2691 Flag Vocabulary'}
+      </button>
+      <button class="btn-secondary" id="next-btn">${nextLabel}</button>
+    </div>
+  `;
+
+  // Wire choice selection
+  document.querySelectorAll('.choice').forEach(el => {
+    el.addEventListener('click', () => handleChoiceClick(q, parseInt(el.dataset.idx, 10)));
+  });
+  $('prev-btn').addEventListener('click', goPrev);
+  $('next-btn').addEventListener('click', goNext);
+  $('flag-btn').addEventListener('click', toggleFlag);
+
+  refreshPalette();
+}
+
+function handleChoiceClick(q, idx) {
+  if (q.type === 'multi') {
+    const cur = Array.isArray(state.responses[q.number]) ? [...state.responses[q.number]] : [];
+    const at = cur.indexOf(idx);
+    if (at > -1) {
+      cur.splice(at, 1);
+    } else {
+      // Allow over-selection but flag it on submit
+      cur.push(idx);
+    }
+    state.responses[q.number] = cur;
+  } else {
+    state.responses[q.number] = idx;
+  }
+  showQuestion(q.number); // re-render to update selection
+}
+
+function toggleFlag() {
+  state.flagged[state.currentQ] = !state.flagged[state.currentQ];
+  showQuestion(state.currentQ);
+}
+
+function goPrev() {
+  const accessible = QUESTIONS.filter(isAccessible);
+  const idx = accessible.findIndex(q => q.number === state.currentQ);
+  if (idx > 0) showQuestion(accessible[idx - 1].number);
+}
+
+function goNext() {
+  const accessible = QUESTIONS.filter(isAccessible);
+  const idx = accessible.findIndex(q => q.number === state.currentQ);
+  if (idx < accessible.length - 1) {
+    showQuestion(accessible[idx + 1].number);
+  } else {
+    // At the last accessible question - prompt to submit current section
+    if (!state.section1Submitted) {
+      promptSubmitSection1();
+    } else {
+      promptFinishTest();
+    }
+  }
+}
+
+/* ============================================================
+   SUBMIT SECTION / FINISH
+============================================================ */
+$('palette-submit').addEventListener('click', () => {
+  if (!state.section1Submitted) {
+    promptSubmitSection1();
+  } else {
+    promptFinishTest();
+  }
+});
+
+function promptSubmitSection1() {
+  const unanswered = QUESTIONS.filter(q => q.section === 1 && !isAnswered(q.number)).length;
+  $('modal-title').textContent = 'Submit Section 1?';
+  $('modal-text').textContent = unanswered > 0
+    ? `You have ${unanswered} unanswered question${unanswered === 1 ? '' : 's'} in Section 1. Once you submit, you cannot return to Section 1.`
+    : 'Once you submit, you cannot return to Section 1. Continue?';
+  $('modal-confirm').textContent = 'Submit Section 1';
+  showModal(() => {
+    state.section1Submitted = true;
+    enterBreak();
+  });
+}
+
+function promptFinishTest() {
+  const unanswered = QUESTIONS.filter(q => q.section === 2 && !isAnswered(q.number)).length;
+  $('modal-title').textContent = 'Finish Test?';
+  $('modal-text').textContent = unanswered > 0
+    ? `You have ${unanswered} unanswered question${unanswered === 1 ? '' : 's'} in Section 2. Submitting will end the test and show your results.`
+    : 'Submitting will end the test and show your results.';
+  $('modal-confirm').textContent = 'Finish Test';
+  showModal(() => finishTest());
+}
+
+function showModal(onConfirm) {
+  $('modal-back').hidden = false;
+  const cancel = () => { $('modal-back').hidden = true; cleanup(); };
+  const confirm = () => { $('modal-back').hidden = true; cleanup(); onConfirm(); };
+  function cleanup() {
+    $('modal-cancel').removeEventListener('click', cancel);
+    $('modal-confirm').removeEventListener('click', confirm);
+  }
+  $('modal-cancel').addEventListener('click', cancel);
+  $('modal-confirm').addEventListener('click', confirm);
+}
+
+/* ============================================================
+   BREAK
+============================================================ */
+function enterBreak() {
+  pauseMainTimer();
+  $('test-screen').hidden = true;
+  $('break-screen').hidden = false;
+  let secs = BREAK_SECONDS;
+  $('break-timer').textContent = formatTime(secs);
+  state.breakTimerInterval = setInterval(() => {
+    secs--;
+    $('break-timer').textContent = formatTime(secs);
+    if (secs <= 0) {
+      clearInterval(state.breakTimerInterval);
+      endBreak();
+    }
+  }, 1000);
+}
+
+function endBreak() {
+  if (state.breakTimerInterval) clearInterval(state.breakTimerInterval);
+  $('break-screen').hidden = true;
+  $('test-screen').hidden = false;
+  resumeMainTimer();
+  showQuestion(26);
+}
+
+$('break-skip').addEventListener('click', endBreak);
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`;
+}
+
+/* ============================================================
+   FINISH & SCORE
+============================================================ */
+function finishTest() {
+  if (state.testEnded) return;
+  state.testEnded = true;
+  pauseMainTimer();
+  if (state.breakTimerInterval) clearInterval(state.breakTimerInterval);
+  $('test-screen').hidden = true;
+  $('break-screen').hidden = true;
+  renderResults();
+  submitToSheet();
+}
+
+function scoreItem(q) {
+  const resp = state.responses[q.number];
+  if (resp === undefined || resp === null) return 0;
+  if (q.type === 'mc') {
+    return resp === q.correct ? q.points : 0;
+  }
+  // Multi-select partial credit:
+  //   +1 per correct selection, -1 per incorrect selection.
+  //   Floor at 0, cap at q.points.
+  if (q.type === 'multi') {
+    const selected = Array.isArray(resp) ? resp : [];
+    let score = 0;
+    selected.forEach(i => {
+      if (q.correct.includes(i)) score++;
+      else score--;
+    });
+    if (score < 0) score = 0;
+    if (score > q.points) score = q.points;
+    return score;
+  }
+  return 0;
+}
+
+function topLevelStandard(std) {
+  const parts = std.split('.');
+  return parts.length >= 3 ? parts.slice(0, 3).join('.') : std;
+}
+
+function computeResults() {
+  let total = 0;
+  let possible = 0;
+  const byCategory = {};
+  REPORTING_CATEGORIES.forEach(c => byCategory[c] = { earned: 0, possible: 0 });
+  const items = [];
+
+  QUESTIONS.forEach(q => {
+    const earned = scoreItem(q);
+    total += earned;
+    possible += q.points;
+    const cat = STD_TO_CATEGORY[topLevelStandard(q.standard)] || 'Numerical Reasoning';
+    byCategory[cat].earned += earned;
+    byCategory[cat].possible += q.points;
+
+    const resp = state.responses[q.number];
+    let respStr = '';
+    let correctStr = '';
+    if (q.type === 'mc') {
+      respStr = (resp === undefined || resp === null) ? '' : String.fromCharCode(65 + resp);
+      correctStr = String.fromCharCode(65 + q.correct);
+    } else {
+      respStr = Array.isArray(resp) ? resp.map(i => String.fromCharCode(65 + i)).sort().join(',') : '';
+      correctStr = q.correct.map(i => String.fromCharCode(65 + i)).sort().join(',');
+    }
+    items.push({
+      number: q.number,
+      section: q.section,
+      standard: q.standard,
+      dok: q.dok,
+      pointsPossible: q.points,
+      pointsEarned: earned,
+      response: respStr,
+      correctAnswer: correctStr
+    });
+  });
+
+  const pct = possible > 0 ? total / possible : 0;
+  const level = achievementLevel(pct);
+  return { total, possible, pct, level, byCategory, items };
+}
+
+function achievementLevel(pct) {
+  if (pct >= ACHIEVEMENT_CUTS.distinguished) return 'Distinguished Learner';
+  if (pct >= ACHIEVEMENT_CUTS.proficient) return 'Proficient Learner';
+  if (pct >= ACHIEVEMENT_CUTS.developing) return 'Developing Learner';
+  return 'Beginning Learner';
+}
+
+/* ============================================================
+   RESULTS RENDER
+============================================================ */
+function renderResults() {
+  const r = computeResults();
+  const screen = $('results-screen');
+  screen.hidden = false;
+
+  $('results-student-line').textContent = `${state.studentName} \u00B7 ${state.studentPeriod}`;
+
+  const levelKey = r.level.split(' ')[0].toLowerCase();
+  $('badge-card').className = `badge-card level-${levelKey}`;
+  $('badge-level').textContent = r.level;
+  $('badge-percent').textContent = `${Math.round(r.pct * 100)}%`;
+  $('badge-score').textContent = `${r.total} / ${r.possible}`;
+
+  // Domain bars
+  const chart = $('domain-chart');
+  chart.innerHTML = REPORTING_CATEGORIES.map(cat => {
+    const c = r.byCategory[cat];
+    const pct = c.possible > 0 ? Math.round((c.earned / c.possible) * 100) : 0;
+    let cls = 'low';
+    if (pct >= 70) cls = 'high';
+    else if (pct >= 40) cls = 'mid';
+    return `
+      <div class="domain-bar-row">
+        <div class="domain-bar-label">
+          <span>${cat}</span>
+          <span class="pct">${pct}%</span>
+        </div>
+        <div class="domain-bar-track">
+          <div class="domain-bar-fill ${cls}" style="width:${pct}%"></div>
+        </div>
+        <div class="domain-bar-meta">${c.earned} of ${c.possible} points earned</div>
+      </div>
+    `;
+  }).join('');
+
+  // Review grid (right/wrong/partial only - no correct answer shown)
+  $('review-grid').innerHTML = r.items.map(it => {
+    let cls = 'incorrect';
+    let mark = '\u2715';
+    if (it.pointsEarned === it.pointsPossible) {
+      cls = 'correct';
+      mark = '\u2713';
+    } else if (it.pointsEarned > 0) {
+      cls = 'partial';
+      mark = '\u00BD';
+    }
+    return `
+      <div class="review-cell ${cls}">
+        <div class="num">${it.number}</div>
+        <div class="mark">${mark}</div>
+        <div class="std">${topLevelStandard(it.standard)}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Flagged list
+  const flaggedNums = Object.keys(state.flagged)
+    .filter(k => state.flagged[k])
+    .map(k => parseInt(k, 10))
+    .sort((a, b) => a - b);
+  if (flaggedNums.length === 0) {
+    $('flagged-display').innerHTML = '<div class="no-flags">No vocabulary flags. Great work staying focused on the math.</div>';
+  } else {
+    $('flagged-display').innerHTML = `<div class="flagged-list">${
+      flaggedNums.map(n => {
+        const q = QUESTIONS.find(qq => qq.number === n);
+        const cat = STD_TO_CATEGORY[topLevelStandard(q.standard)];
+        return `<div class="flagged-item">
+          <div class="qnum">Q${n}</div>
+          <div>
+            <div>${q.standard}</div>
+            <div class="domain">${cat}</div>
+          </div>
+        </div>`;
+      }).join('')
+    }</div>`;
+  }
+}
+
+/* ============================================================
+   SUBMIT TO APPS SCRIPT
+============================================================ */
+function submitToSheet() {
+  const r = computeResults();
+  const flaggedNums = Object.keys(state.flagged)
+    .filter(k => state.flagged[k])
+    .map(k => parseInt(k, 10))
+    .sort((a, b) => a - b);
+
+  const timeUsed = Math.round((Date.now() - state.startTime) / 1000);
+
+  const domainBreakdown = REPORTING_CATEGORIES.map(cat => {
+    const c = r.byCategory[cat];
+    return {
+      domain: cat,
+      percent: c.possible > 0 ? Math.round((c.earned / c.possible) * 100) : 0,
+      earned: c.earned,
+      possible: c.possible
+    };
+  });
+
+  const payload = {
+    // Spec-required summary fields
+    studentName: state.studentName,
+    studentPeriod: state.studentPeriod,
+    totalScore: r.total,
+    totalQuestions: QUESTIONS.length,
+    percentCorrect: Math.round(r.pct * 100),
+    achievementLevel: r.level,
+    domainBreakdown: domainBreakdown,
+    vocabFlags: flaggedNums,
+    timestamp: new Date().toISOString(),
+    timeUsed: timeUsed,
+    // Compatibility fields for diagnostic logging in Code.gs
+    student: {
+      name: state.studentName,
+      period: state.studentPeriod,
+      id: '',
+      teacher: ''
+    },
+    timeSpentMinutes: Math.round(timeUsed / 60 * 10) / 10,
+    items: r.items
+  };
+
+  if (!APPS_SCRIPT_URL) {
+    setStatus('error', 'Apps Script URL is not configured. Results not submitted.');
+    return;
+  }
+
+  // text/plain content type avoids CORS preflight on Apps Script web apps.
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    // no-cors mode = opaque response, can't read body, but request will have hit the server
+    setStatus('success', 'Results submitted to your teacher.');
+  }).catch(err => {
+    setStatus('error', 'Could not reach the server. Your teacher may need to retry submission.');
+    console.error(err);
+  });
+}
+
+function setStatus(kind, msg) {
+  const el = $('submit-status');
+  el.className = `submit-status ${kind}`;
+  el.textContent = msg;
+}
+
+/* ============================================================
+   PROTECT AGAINST ACCIDENTAL TAB CLOSE
+============================================================ */
+window.addEventListener('beforeunload', (e) => {
+  if (state.startTime && !state.testEnded) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+</script>
+
+</body>
+</html>
